@@ -18,9 +18,6 @@ interface UsePriceCalculationResult {
   refetch: () => void;
 }
 
-/**
- * Custom hook for managing price calculation
- */
 export function usePriceCalculation(
   config: Configuration | null,
   product: Product,
@@ -30,45 +27,58 @@ export function usePriceCalculation(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Track latest request timestamp to prevent stale responses from overwriting newer ones.
-  // Guards against race conditions when the user changes options in rapid succession.
-  const latestRequestRef = useRef<number>(0);
+  // Tracks the latest request to prevent stale responses from updating the state.
+  const latestRequestRef = useRef(0);
 
   const fetchPrice = useCallback(async () => {
+    // Assign a unique, increasing ID to every request.
+    const requestId = ++latestRequestRef.current;
+
     if (!config) {
       setPrice(null);
       setFormattedTotal('$0.00');
+      setError(null);
+      setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
     setError(null);
 
-    const requestTime = Date.now();
-    latestRequestRef.current = requestTime;
-
     try {
       const response: PriceResponse = await calculatePrice(config, product);
 
-      if (response.timestamp >= latestRequestRef.current) {
-        setPrice(response.breakdown);
-        setFormattedTotal(response.formattedTotal);
+      // Only the latest request can update the price.
+      if (requestId !== latestRequestRef.current) {
+        return;
       }
+
+      setPrice(response.breakdown);
+      setFormattedTotal(response.formattedTotal);
     } catch {
-      // Only set error if this is still the latest request
-      if (requestTime === latestRequestRef.current) {
+      // Only the latest request can update the error state.
+      if (requestId === latestRequestRef.current) {
         setError('ERR_PRICE_CALC_FAILED');
         setPrice(null);
       }
     } finally {
-      setIsLoading(false);
+      // An outdated request must not stop the latest request's loading state.
+      if (requestId === latestRequestRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [config, product]);
 
-  // Fetch price when config changes
+  // Fetch a new price whenever the configuration or product changes.
   useEffect(() => {
-    fetchPrice();
-  }, [config?.selections, config?.addOns, config?.quantity]);
+    const timeoutId = setTimeout(() => {
+      void fetchPrice();
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [fetchPrice]);
 
   return {
     price,

@@ -212,6 +212,7 @@ function formatCurrency(amount: number, currency: string): string {
 /**
  * Encode configuration to URL-safe string
  */
+
 export function encodeConfigurationToUrl(config: Configuration): string {
   const data = JSON.stringify({
     s: config.selections,
@@ -220,7 +221,17 @@ export function encodeConfigurationToUrl(config: Configuration): string {
     n: config.name,
   });
 
-  return btoa(data);
+  // Encode the JSON string as UTF-8 bytes.
+  const bytes = new TextEncoder().encode(data);
+
+  // Convert the bytes into a binary string for btoa.
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  // Convert Base64 into URL-safe Base64.
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 /**
@@ -228,7 +239,20 @@ export function encodeConfigurationToUrl(config: Configuration): string {
  */
 export function decodeConfigurationFromUrl(encoded: string): Partial<Configuration> | null {
   try {
-    const data = JSON.parse(atob(encoded));
+    // Support both URL-safe Base64 and legacy standard Base64.
+    // Spaces are converted back to '+' for older links passed through URLSearchParams.
+    const base64 = encoded.replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/');
+
+    // Restore Base64 padding if it was removed.
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+
+    // Decode Base64 into bytes.
+    const binary = atob(padded);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+
+    // Decode UTF-8 bytes into the original JSON string.
+    const data = JSON.parse(new TextDecoder().decode(bytes));
+
     return {
       selections: data.s || {},
       addOns: data.a || [],
