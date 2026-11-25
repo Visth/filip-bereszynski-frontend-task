@@ -2,7 +2,7 @@
 
 ## Time Spent
 
-Total time: **\04 hours \24 minutes** (approximate)
+Total time: **04 hours 24 minutes** (approximate)
 
 ## Ticket Triage
 
@@ -11,35 +11,26 @@ Total time: **\04 hours \24 minutes** (approximate)
 List the ticket numbers you worked on, in the order you addressed them:
 
 1. **CFG-142**: Fixed a race condition in price calculation by introducing sequential request IDs and ensuring that only the latest request can update the price, error, and loading states.
+
 2. **CFG-143**: Fixed the missing cleanup of the window resize event listener by removing the listener when the component unmounts.
+
 3. **CFG-144 and CFG-145**: Identified conflicting requirements regarding the Quick Add feature. CFG-144 suggests removing the feature, while CFG-145 proposes adding keyboard shortcut support. Since the TechStyle demo requirements indicate that Quick Add is needed, I postponed both changes and requested clarification before proceeding.
+
 4. **CFG-148**: Fixed a critical bug in add-on dependency handling. Replaced direct array mutation with immutable state updates and corrected the dependency cleanup logic to handle both select and toggle options. This ensures that dependent add-ons are automatically removed when their requirements are no longer met, preventing application crashes.
+
 5. **CFG-147**: Fixed Unicode encoding issues and made configuration sharing URLs URL-safe. Replaced direct Base64 encoding with UTF-8 encoding using TextEncoder and TextDecoder, and implemented URL-safe Base64 conversion. The decoder also maintains compatibility with legacy standard Base64 links. Verified Unicode round-trip, URL-safe output, and legacy Base64 decoding.
+
 6. **CFG-158**: Reviewed the reported performance issue and inspected the ProductConfigurator component and its parent (App.tsx). Found that currentConfig is already memoized using useMemo, while product is passed as a stable imported mockProduct reference. The callback props are also memoized using useCallback. No additional memoization was introduced because the suggested changes were already partially implemented, and further optimizations without profiling evidence could add unnecessary complexity.
+
 7. **CFG-152**: Implemented keyboard accessibility improvements across the product configurator, addressing the reported issues and additional accessibility problems discovered during code review.
+   Changes made in CFG-152:
 
-Changes made:
-
-Color picker: Implemented keyboard navigation using arrow keys, Home, End, Enter, and Space. Added roving tabIndex so only the selected (or first available) color is included in the normal tab order. Unavailable colors are skipped, and read-only mode prevents selection changes.
-
-Focus indicators: Added visible :focus-visible outlines to color swatches, quantity controls, and primary buttons to make keyboard focus easier to identify.
-
-Modal focus management: Added automatic focus transfer into the modal when opened and focus restoration to the original trigger after closing. Implemented a focus trap to keep keyboard navigation inside the modal and preserved Escape key handling.
-
-Modal semantics: Added role="dialog", aria-modal="true", and aria-labelledby to both modals to provide appropriate information to assistive technologies.
-
-Add-on checkboxes: Fixed the empty onChange handler so checkboxes can be operated using the keyboard. Prevented event propagation to avoid triggering the parent click handler and toggling an add-on twice.
-
-Toggle switches: Improved keyboard interaction and ensured that read-only switches cannot be changed using Enter or Space. 8. **CFG-146**: Fixed the draft "Last saved" timestamp handling by using the actual savedAt value returned from saveDraft() instead of creating a new timestamp independently. The ISO timestamp is parsed into a JavaScript Date object and displayed using the user's local timezone. Verified that the displayed time matches the expected local time after saving a draft. 9. **CFG-149**: Improved the price calculation loading state by adding animated loading dots next to the old price label. The existing opacity change was preserved to make it clear that the displayed price is being recalculated. Added support for reduced-motion accessibility preferences. Verified that the loading indicator appears during price calculation and disappears when the calculation completes. 10. **CFG-150**: Fixed the color picker layout by replacing the flex-based layout with CSS Grid and using the dynamically calculated column count. Updated the resize handler to calculate and apply the column count independently to every color picker instead of relying on a single shared ref. This ensures that color swatches are arranged consistently across different viewport widths.
-
-### Tickets I Deprioritized
-
-List tickets you intentionally skipped and why:
-
-| Ticket  | Reason                 |
-| ------- | ---------------------- |
-| CFG-144 |                        |
-| CFG-145 | [Why you skipped this] |
+- Color picker: Implemented keyboard navigation using arrow keys, Home, End, Enter, and Space. Added roving tabIndex so only the selected (or first available) color is included in the normal tab order. Unavailable colors are skipped, and read-only mode prevents selection changes.
+- Focus indicators: Added visible :focus-visible outlines to color swatches, quantity controls, and primary buttons to make keyboard focus easier to identify.
+- Modal focus management: Added automatic focus transfer into the modal when opened and focus restoration to the original trigger after closing. Implemented a focus trap to keep keyboard navigation inside the modal and preserved Escape key handling.
+- Modal semantics: Added role="dialog", aria-modal="true", and aria-labelledby to both modals to provide appropriate information to assistive technologies.
+- Add-on checkboxes: Fixed the empty onChange handler so checkboxes can be operated using the keyboard. Prevented event propagation to avoid triggering the parent click handler and toggling an add-on twice.
+- Toggle switches: Improved keyboard interaction and ensured that read-only switches cannot be changed using Enter or Space. 8. **CFG-146**: Fixed the draft "Last saved" timestamp handling by using the actual savedAt value returned from saveDraft() instead of creating a new timestamp independently. The ISO timestamp is parsed into a JavaScript Date object and displayed using the user's local timezone. Verified that the displayed time matches the expected local time after saving a draft. 9. **CFG-149**: Improved the price calculation loading state by adding animated loading dots next to the old price label. The existing opacity change was preserved to make it clear that the displayed price is being recalculated. Added support for reduced-motion accessibility preferences. Verified that the loading indicator appears during price calculation and disappears when the calculation completes. 10. **CFG-150**: Fixed the color picker layout by replacing the flex-based layout with CSS Grid and using the dynamically calculated column count. Updated the resize handler to calculate and apply the column count independently to every color picker instead of relying on a single shared ref. This ensures that color swatches are arranged consistently across different viewport widths.
 
 ### Tickets That Need Clarification
 
@@ -203,14 +194,6 @@ Identified conflicting requirements: CFG-144 suggests removing Quick Add, while 
 ---
 
 ## Code Quality Notes
-
-### Things I Noticed But Didn't Fix
-
-List any issues you noticed but intentionally left:
-
-| Issue   | Why I Left It                                         |
-| ------- | ----------------------------------------------------- |
-| [Issue] | [Reason - out of scope, time, needs discussion, etc.] |
 
 ### Potential Improvements for the Future
 
